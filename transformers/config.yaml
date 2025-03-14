@@ -1,0 +1,79 @@
+# Chessformer Configuration
+
+# Model configuration
+model:
+  # Architecture parameters
+  embedding_size: 1024 # Dimension of embeddings
+  encoder_layers: 15 # Number of transformer encoder layers
+  encoder_heads: 32 # Number of attention heads
+  encoder_dff: 4096 # Feed-forward network hidden dimension
+  dropout_rate: 0.1 # Dropout rate
+  history_length: 8 # Number of past positions to include in input (1-8)
+  d_value: 32 # Dimension for value output
+  value_embedding_dim: 128 # Dimension for value embeddings
+
+# Training configuration
+training:
+  batch_size: 256
+  learning_rate: 0.001
+  beta1: 0.9
+  beta2: 0.98
+  epsilon: 1.0e-7
+  gradient_clip: 10
+  epochs: 100
+  checkpoint_frequency: 10000 # Save checkpoint every N steps
+  steps_per_epoch: 1000
+  eval_frequency: 5000 # Evaluate model every N steps
+
+  # Optimizer settings
+  optimizer: "nadam" # Options: adam, adamw, nadam
+  weight_decay: 0.01 # L2 regularization (for AdamW)
+
+  # Learning rate schedule
+  lr_schedule:
+    type: "manual" # Options: cosine, linear, manual
+    warmup_steps: 10000
+    decay_steps:
+      - 320000 # Steps at which to reduce LR
+      - 360000
+    decay_factors:
+      - 0.3 # Multiply LR by this factor at corresponding step
+      - 0.33
+
+  # Loss weights
+  loss_weights:
+    policy: 1.0
+    soft_policy: 8.0
+    value_wdl: 1.0
+    value_l2: 1.0
+    value_cat: 0.1
+    value_error: 1.0
+
+# Dataset configuration
+dataset:
+  input_train:
+    - "training-run3-20190614-2318/*.gz" # Path to training data
+  input_test:
+    - "training-run3-20190614-2318/training.1728.gz" # Path to validation data
+  format: "v4" # Data format (v7b, v7, v6, v4, etc.)
+
+  # Data processing
+  preprocess:
+    shuffle_buffer: 10000
+    prefetch_size: 32
+    num_workers: 8
+    cache_data: false
+
+# Evaluation configuration
+evaluation:
+  batch_size: 128
+  num_games: 1000
+  opening_book: "path/to/opening/book.pgn"
+  time_control: "60+0.6" # Base time + increment in seconds
+
+# Logging and output
+output:
+  log_dir: "logs"
+  tensorboard: true
+  save_dir: "checkpoints"
+  best_model_dir: "best_model"

@@ -1,0 +1,62 @@
+# Small Chessformer Model Configuration for Rapid Testing
+
+# Model configuration
+model:
+  # Architecture parameters - smaller version for quick training
+  embedding_size: 128 # Dimension of embeddings (down from 1024)
+  encoder_layers: 2 # Number of transformer encoder layers (down from 15)
+  encoder_heads: 4 # Number of attention heads (down from 32)
+  encoder_dff: 256 # Feed-forward network hidden dimension (down from 4096)
+  dropout_rate: 0.1 # Dropout rate
+  history_length: 8 # Number of past positions to include in input (1-8)
+  d_value: 16 # Dimension for value output (down from 32)
+  value_embedding_dim: 32 # Dimension for value embeddings (down from 128)
+
+# Training configuration
+training:
+  batch_size: 8 # REDUCED from 32 to prevent OOM
+  learning_rate: 0.001
+  beta1: 0.9
+  beta2: 0.98
+  epsilon: 1.0e-7
+  gradient_clip: 10
+  epochs: 5 # Just a few epochs for testing
+  checkpoint_frequency: 1 # Save checkpoint every epoch
+  eval_frequency: 100 # Evaluate model every 100 steps
+
+  # Optimizer settings
+  optimizer: "adam" # Options: adam, adamw, nadam
+  weight_decay: 0.01 # L2 regularization (for AdamW)
+
+  # Learning rate schedule
+  lr_schedule:
+    type: "cosine" # Options: cosine, linear, manual
+    warmup_steps: 100
+
+  # Loss weights
+  loss_weights:
+    policy: 1.0
+    soft_policy: 8.0
+    value_wdl: 1.0
+    value_l2: 1.0
+    value_cat: 0.1
+    value_error: 1.0
+
+# Dataset configuration - using PyTorch's random_split
+dataset:
+  train_ratio: 0.8 # 80% train, 20% validation
+  random_seed: 42 # Seed for reproducible splits
+
+  # Data processing
+  preprocess:
+    shuffle_buffer: 1000
+    prefetch_size: 2 # REDUCED from 4
+    num_workers: 1 # REDUCED from 2
+    cache_data: false
+
+# Logging and output
+output:
+  log_dir: "logs"
+  tensorboard: true
+  save_dir: "checkpoints"
+  best_model_dir: "best_model"
